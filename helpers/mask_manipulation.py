@@ -1,5 +1,6 @@
 import numpy as np
 from functools import reduce
+from math import ceil, sqrt
 
 def load_csv_mask():
     pass
@@ -12,15 +13,30 @@ def mask_to_binary(rle_mask, dim=(101,101), index_zero=False, col_encoding=True)
     :param col_encoding: flag on whether to the RLE is by column (True) or by row
     :return: mask matrix as numpy array
     """
-    # if dim is none: dim = ceil(sqrt(max))
-    # if dim is single value: square
-    # out = np.array zeroes, dim ()
-    n_cells = reduce((lambda x, y: x * y), dim)
-    decoded_array = np.zeros(n_cells)
 
     # split input in two: starts points and lengths:
     encoded_starts, encoded_lengths = rle_mask[::2], rle_mask[1::2]
     encoded_ends = [sum(x) for x in zip(encoded_starts, encoded_lengths)]
+
+    # if dim is none: dim = ceil(sqrt(max))
+    if not dim:
+        min_dim = ceil(sqrt(max(encoded_ends)))
+        dim = (min_dim, min_dim)
+
+    # if single value given as dim, assume it is dimension of square output
+    if type(dim) is int:
+        dim = (dim,dim)
+    try:
+        if len(dim)==1:
+            dim=(dim[0], dim[0])
+    except:
+        pass
+
+    # out = np.array zeroes, dim ()
+    n_cells = reduce((lambda x, y: x * y), dim)
+    decoded_array = np.zeros(n_cells)
+
+
 
     if not index_zero:
         encoded_starts = [x-1 for x in encoded_starts]
@@ -37,4 +53,5 @@ def mask_to_binary(rle_mask, dim=(101,101), index_zero=False, col_encoding=True)
     return decoded_matrix
 
 def binary_to_mask():
+
     pass
