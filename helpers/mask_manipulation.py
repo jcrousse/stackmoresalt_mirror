@@ -52,6 +52,24 @@ def mask_to_binary(rle_mask, dim=(101,101), index_zero=False, col_encoding=True)
 
     return decoded_matrix
 
-def binary_to_mask():
+def binary_to_mask(binary_mask, index_zero=False, col_encoding=True):
+    array_mask = np.array(binary_mask)
 
-    pass
+    if col_encoding:
+        array_mask = np.transpose(array_mask)
+
+    index_shift = 1
+    if not index_zero:
+        index_shift = 2
+
+    flat_mask = array_mask.flatten()
+
+    rle = np.where(flat_mask[1:] != flat_mask[:-1])[0] + index_shift
+    if flat_mask[0]:
+        rle = np.append([1], rle)
+    if flat_mask[-1]:
+        rle=np.append(rle, [len(flat_mask)+1])
+    rle[1::2] = rle[1::2] - rle[::2]
+
+    return rle
+
