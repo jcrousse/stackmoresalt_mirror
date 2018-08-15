@@ -54,7 +54,6 @@ def mask_to_binary(rle_mask, dim=(101,101), index_zero=False, col_encoding=True)
 
 def binary_to_mask(binary_mask, index_zero=False, col_encoding=True):
     """
-
     :param binary_mask: array containing the mask with 0/1 values
     :param index_zero: whether the encoding should start at index 0 (True) or not
     :param col_encoding: whether the output encoding should be by column (True) or row
