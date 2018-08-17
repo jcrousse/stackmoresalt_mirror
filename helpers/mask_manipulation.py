@@ -54,12 +54,12 @@ def mask_to_binary(rle_mask, dim=(101,101), index_zero=False, col_encoding=True)
 
 def binary_to_mask(binary_mask, index_zero=False, col_encoding=True):
     """
-    :param binary_mask: array containing the mask with 0/1 values
+    :param binary_mask: array containing the mask with 0/1 values or probability values
     :param index_zero: whether the encoding should start at index 0 (True) or not
     :param col_encoding: whether the output encoding should be by column (True) or row
     :return: RLE array of the mask
     """
-    array_mask = np.array(binary_mask)
+    array_mask = np.rint(np.array(binary_mask))
 
     if col_encoding:
         array_mask = np.transpose(array_mask)
@@ -77,5 +77,5 @@ def binary_to_mask(binary_mask, index_zero=False, col_encoding=True):
         rle=np.append(rle, [len(flat_mask)+1])
     rle[1::2] = rle[1::2] - rle[::2]
 
-    return rle
+    return list(rle)
 

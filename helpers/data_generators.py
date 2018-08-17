@@ -15,6 +15,11 @@ def load_resize_bw_image(img_path, target_shape=(128, 128, 1)):
     array_image = np.reshape(resized_image, target_shape)
     return array_image
 
+def array_to_image(img_array, target_shape=(101, 101)):
+    resized_image = resize(img_array, (target_shape))
+    array_image = np.reshape(resized_image, target_shape)
+    return array_image
+
 def generate_training_batch(data, train_dict, mask_dict, batch_size, target_shape=(128, 128,
                                                                                    1)):
     while True:

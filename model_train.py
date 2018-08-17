@@ -4,6 +4,7 @@ from sklearn import model_selection
 from models.UNet import unet_128
 from helpers.model_management import get_model_memory_usage
 from helpers.data_generators import *
+
 import json
 
 
@@ -14,7 +15,7 @@ with open('config.json') as f:
 data_path = paths['train_images_path']
 mask_path = paths['train_masks_path']
 
-BATCH_SIZE = 10
+BATCH_SIZE = 1
 
 train_img_dict = get_image_dict(data_path)
 mask_img_dict = get_image_dict(mask_path)
@@ -33,9 +34,11 @@ model.compile(
 print(model.summary())
 print(get_model_memory_usage(BATCH_SIZE, model))
 
-num_epochs = 30
+num_epochs = 2
 steps_per_epoch = int(len(img_ids) * 0.8/BATCH_SIZE)
 
 model.fit_generator(train_generator,
                     steps_per_epoch=steps_per_epoch,
                     epochs=num_epochs)
+
+model.save('temp.model')
