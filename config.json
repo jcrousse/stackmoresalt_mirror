@@ -1,4 +1,0 @@
-{
-  "train_images_path": "/path/to/images",
-  "train_masks_path" : "/path/to/masks"
-}
