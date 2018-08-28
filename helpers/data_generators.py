@@ -38,3 +38,19 @@ def generate_training_batch(data, train_dict, mask_dict, batch_size, target_shap
         X = np.asarray(X_batch, dtype=np.float32)
         Y = np.asarray(Y_batch, dtype=np.float32)
         yield X, Y
+
+def generate_test_batch(data, test_dict, batch_size, target_shape=(128, 128, 1)):
+
+    X_batch = []
+
+    l=len(data)
+
+    for ndx in range(0, l, batch_size):
+        batch_ids = data[ndx:min(ndx + batch_size, l)]
+        for idx, img_id in enumerate(batch_ids):
+            X_batch.append(
+                load_resize_bw_image(test_dict[img_id], target_shape)
+            )
+        X = np.asarray(X_batch, dtype=np.float32)
+
+        yield X

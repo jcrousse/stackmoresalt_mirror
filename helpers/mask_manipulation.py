@@ -77,5 +77,5 @@ def binary_to_mask(binary_mask, index_zero=False, col_encoding=True):
         rle=np.append(rle, [len(flat_mask)+1])
     rle[1::2] = rle[1::2] - rle[::2]
 
-    return list(rle)
+    return " ".join([str(val) for val in list(rle)])
 
