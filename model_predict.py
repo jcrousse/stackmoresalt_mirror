@@ -39,6 +39,7 @@ test_generator2 = data_generator(
     train_dict=test_img_dict,
     label_dict={},
     batch_size=BATCH_SIZE,
+    shuffle=False,
     train=False
 )
 
@@ -49,7 +50,7 @@ pred_list = [array_to_image(image) for image in predictions]
 rle_submission = [binary_to_mask(pred) for pred in pred_list]
 
 submission_df = pd.DataFrame({'id': test_ids[0:len(rle_submission)],
-                              'rle': rle_submission}
+                              'rle_mask': rle_submission}
                              )
 submission_df.to_csv("/output/submission.csv", index=False)
 
