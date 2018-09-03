@@ -14,7 +14,7 @@ model = unet_768()
 model_name = "U768_t1_b40_e20.model"
 model_path = "trained_models"
 
-BATCH_SIZE = 32
+BATCH_SIZE = 200 # must divide length of test set for full prediction
 SAVE_PREDICTION_IMG = False
 
 paths={}
@@ -33,8 +33,8 @@ model.load_weights(train_model_path)
 test_img_dict = get_image_dict(test_path)
 test_ids = list(test_img_dict.keys())
 
-test_generator = generate_test_batch(test_ids, test_img_dict, BATCH_SIZE)
-test_generator2 = data_generator(
+
+test_generator = data_generator(
     list_IDs=test_ids,
     train_dict=test_img_dict,
     label_dict={},
@@ -44,7 +44,7 @@ test_generator2 = data_generator(
 )
 
 steps = len(test_ids)//BATCH_SIZE
-predictions = model.predict_generator(test_generator2, steps=steps, verbose=1, max_q_size = 1)
+predictions = model.predict_generator(test_generator, steps=steps, verbose=1, max_q_size = 1)
 pred_list = [array_to_image(image) for image in predictions]
 
 rle_submission = [binary_to_mask(pred) for pred in pred_list]

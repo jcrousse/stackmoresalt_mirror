@@ -30,7 +30,7 @@ mask_img_dict = get_image_dict(mask_path)
 img_ids = list(train_img_dict.keys())
 train_ids, validation_ids = model_selection.train_test_split(img_ids, random_state=1, test_size=0.20)
 
-train_generator2 = data_generator(list_IDs=train_ids,
+train_generator = data_generator(list_IDs=train_ids,
                                   train_dict=train_img_dict,
                                   label_dict=mask_img_dict,
                                   batch_size=BATCH_SIZE
@@ -48,7 +48,7 @@ print(get_model_memory_usage(BATCH_SIZE, model))
 num_epochs = 20
 steps_per_epoch = int(len(img_ids) * 0.8/BATCH_SIZE)
 
-model.fit_generator(train_generator2,
+model.fit_generator(train_generator,
                     steps_per_epoch=steps_per_epoch,
                     epochs=num_epochs)
 

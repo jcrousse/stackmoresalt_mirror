@@ -7,7 +7,7 @@ def get_image_dict(image_path):
     return {
         os.path.splitext(img_filename)[0]:
             os.path.join(image_path, img_filename)
-        for img_filename in os.listdir(image_path)}
+        for img_filename in os.listdir(image_path) if os.path.splitext(img_filename)[1]}
 
 def load_resize_bw_image(img_path, target_shape=(128, 128, 1)):
     bw_image_data = imread(img_path, pilmode='L')
