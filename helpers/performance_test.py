@@ -1,7 +1,14 @@
 from keras import backend as K
 from keras.losses import binary_crossentropy
 
+
 def dice_coef(y_true, y_pred, smooth=1):
+    intersection = K.sum(y_true * y_pred, axis=[1,2,3])
+    union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
+    return K.mean( (2. * intersection + smooth) / (union + smooth), axis=0)
+
+
+def dice_coef2(y_true, y_pred, smooth=1):
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
 

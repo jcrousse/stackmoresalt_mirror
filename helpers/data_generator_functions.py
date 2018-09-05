@@ -9,10 +9,12 @@ def get_image_dict(image_path):
             os.path.join(image_path, img_filename)
         for img_filename in os.listdir(image_path) if os.path.splitext(img_filename)[1]}
 
-def load_resize_bw_image(img_path, target_shape=(128, 128, 1)):
+def load_resize_bw_image(img_path, target_shape=(128, 128, 1), normalize=True):
     bw_image_data = imread(img_path, pilmode='L')
     resized_image = resize(bw_image_data, (target_shape[0], target_shape[1]))
     array_image = np.reshape(resized_image, target_shape)
+    if normalize:
+        return array_image/255
     return array_image
 
 def array_to_image(img_array, target_shape=(101, 101)):
