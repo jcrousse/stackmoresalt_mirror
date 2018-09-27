@@ -5,10 +5,12 @@ from models.UNet import unet_128, unet_768, unet_256
 from helpers.model_management import get_model_memory_usage
 from helpers.data_generator_functions import *
 from helpers.class_generators import data_generator
+from clustering_tools.apply_clustering import apply_clustering
+from clustering_tools.rule_based_clusters import split_by_hue
 import json
 
-BATCH_SIZE = 1
-EPOCHS = 1
+BATCH_SIZE = 100
+EPOCHS = 300
 MODEL_SIZE = 128
 DROPOUT = 0.3
 FLIP_FLAG = True
@@ -46,7 +48,8 @@ mask_img_dict = get_image_dict(mask_path)
 
 img_ids = list(train_img_dict.keys())
 
-img_ids_list = [img_ids]
+img_ids_list = apply_clustering(img_ids, train_img_dict, split_by_hue)
+
 for idx, cluster in enumerate(img_ids_list):
     train_ids, validation_ids = model_selection.train_test_split(img_ids, random_state=1, test_size=0.20)
 
