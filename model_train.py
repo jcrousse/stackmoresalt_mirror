@@ -7,10 +7,23 @@ from helpers.data_generator_functions import *
 from helpers.class_generators import data_generator
 import json
 
-BATCH_SIZE = 100
-EPOCHS = 300
-model = unet_128(drop_rate=0.3)
-MODEL_NAME = 'U128_t1_b200_e100.model'
+BATCH_SIZE = 1
+EPOCHS = 1
+MODEL_SIZE = 128
+DROPOUT = 0.3
+FLIP_FLAG = True
+
+#############################################
+
+size_to_model= {
+    128 : unet_128,
+    256 : unet_256,
+    768 : unet_768
+}
+
+
+model = size_to_model[MODEL_SIZE](drop_rate= DROPOUT)
+unet_128(drop_rate=0.3)
 
 paths={}
 
@@ -19,37 +32,47 @@ with open('config.json') as f:
 
 data_path = paths['train_images_path']
 mask_path = paths['train_masks_path']
-
+out_model = paths['out_model_path']
 
 # floydhub paths
 if not os.path.isfile(".iamlocal"): #if running on floydhub
     data_path = "/train/images"
     mask_path = "/train/masks"
+    out_model = "/output"
 
 
 train_img_dict = get_image_dict(data_path)
 mask_img_dict = get_image_dict(mask_path)
 
 img_ids = list(train_img_dict.keys())
-train_ids, validation_ids = model_selection.train_test_split(img_ids, random_state=1, test_size=0.20)
 
-train_generator = data_generator(list_IDs=train_ids,
-                                  train_dict=train_img_dict,
-                                  label_dict=mask_img_dict,
-                                  batch_size=BATCH_SIZE
-                                  )
+img_ids_list = [img_ids]
+for idx, cluster in enumerate(img_ids_list):
+    train_ids, validation_ids = model_selection.train_test_split(img_ids, random_state=1, test_size=0.20)
 
-model.compile(
-    loss=performance_test.bce_dice_loss,
-    optimizer=Adam(lr=1e-4),
-    metrics=[performance_test.dice_coef])
+    train_generator = data_generator(list_IDs=train_ids,
+                                     train_dict=train_img_dict,
+                                     label_dict=mask_img_dict,
+                                     batch_size=BATCH_SIZE,
+                                     flip=FLIP_FLAG
+                                     )
 
-print(model.summary())
-print(get_model_memory_usage(BATCH_SIZE, model))
+    model.compile(
+        loss=performance_test.bce_dice_loss,
+        optimizer=Adam(lr=1e-4),
+        metrics=[performance_test.dice_coef])
+
+    print(model.summary())
+    print(get_model_memory_usage(BATCH_SIZE, model))
 
 
-model.fit_generator(train_generator,
-                    epochs=EPOCHS)
+    model.fit_generator(train_generator,
+                        epochs=EPOCHS)
 
-# model name: U128_t1_b40_e20 = Unet 128, train set 1, Batch size 40, epochs: 20.
-model.save('/output/'+ MODEL_NAME)
+    # model name: U128_t1_b40_e20 = Unet 128, train set 1, Batch size 40, epochs: 20.
+    model_name = 'U'+ str(MODEL_SIZE) +\
+                 '_b' + str(BATCH_SIZE) +\
+                 '_e' + str(EPOCHS) +\
+                 '_' + str(idx) + '.model'
+    model_save_path = os.path.join(out_model, model_name)
+    model.save(model_save_path)
