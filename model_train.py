@@ -1,12 +1,16 @@
 from helpers import performance_test
 from keras.optimizers import Adam
 from sklearn import model_selection
-from models.UNet import unet_128, unet_768
+from models.UNet import unet_128, unet_768, unet_256
 from helpers.model_management import get_model_memory_usage
 from helpers.data_generator_functions import *
 from helpers.class_generators import data_generator
 import json
 
+BATCH_SIZE = 100
+EPOCHS = 300
+model = unet_128(drop_rate=0.3)
+MODEL_NAME = 'U128_t1_b200_e100.model'
 
 paths={}
 
@@ -22,7 +26,6 @@ if not os.path.isfile(".iamlocal"): #if running on floydhub
     data_path = "/train/images"
     mask_path = "/train/masks"
 
-BATCH_SIZE = 32
 
 train_img_dict = get_image_dict(data_path)
 mask_img_dict = get_image_dict(mask_path)
@@ -36,7 +39,6 @@ train_generator = data_generator(list_IDs=train_ids,
                                   batch_size=BATCH_SIZE
                                   )
 
-model = unet_768()
 model.compile(
     loss=performance_test.bce_dice_loss,
     optimizer=Adam(lr=1e-4),
@@ -45,12 +47,9 @@ model.compile(
 print(model.summary())
 print(get_model_memory_usage(BATCH_SIZE, model))
 
-num_epochs = 20
-steps_per_epoch = int(len(img_ids) * 0.8/BATCH_SIZE)
 
 model.fit_generator(train_generator,
-                    steps_per_epoch=steps_per_epoch,
-                    epochs=num_epochs)
+                    epochs=EPOCHS)
 
 # model name: U128_t1_b40_e20 = Unet 128, train set 1, Batch size 40, epochs: 20.
-model.save('/output/U768_t1_b32_e20.model')
+model.save('/output/'+ MODEL_NAME)

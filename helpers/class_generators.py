@@ -5,7 +5,7 @@ import numpy as np
 
 class data_generator(Sequence):
     def __init__(self, list_IDs, train_dict, label_dict, batch_size=32, dim=(128, 128, 1),
-                 shuffle=True, train=True):
+                 shuffle=True, train=True, flip=False):
         self.dim = dim
         self.batch_size = batch_size
         self.label_dict = label_dict
@@ -14,6 +14,7 @@ class data_generator(Sequence):
         self.on_epoch_end()
         self.train_dict = train_dict
         self.train = train
+        self.flip = flip
 
     def __len__(self):
         'Denotes the number of batches per epoch'
@@ -51,7 +52,7 @@ class data_generator(Sequence):
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
-            out_array[i,] = load_resize_bw_image(self.train_dict[ID], self.dim)
+            out_array[i,] = load_resize_bw_image(dict_path[ID], self.dim)
 
         return out_array
 
@@ -66,5 +67,20 @@ class data_generator(Sequence):
             # Store sample
             X[i,] = load_resize_bw_image(self.train_dict[ID], self.dim)
             y[i,] = load_resize_bw_image(self.label_dict[ID], self.dim)
+            if self.flip:
+                choice = np.random.randint(0, 4)
+                X[i,] = self.random_flip(X[i,], choice)
+                y[i,] = self.random_flip(y[i,], choice)
 
         return X, y
+
+    def random_flip(self, item, choice):
+        if not choice:
+            return item
+        elif choice == 1:
+            return np.flip(item, 0)
+        elif choice == 2:
+            return np.flip(item, 1)
+        else:
+            return np.flip(np.flip(item, 0),1)
+
