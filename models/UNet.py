@@ -14,17 +14,19 @@ def down(filters, input_, drop_rate=0.0):
     down_ = Conv2D(filters, (3, 3), padding='same')(input_)
     down_ = BatchNormalization(epsilon=1e-4)(down_)
     down_ = Activation('relu')(down_)
-    down_ = Dropout(drop_rate)(down_)
+    # down_ = Dropout(drop_rate)(down_)
     down_ = Conv2D(filters, (3, 3), padding='same')(down_)
     down_ = BatchNormalization(epsilon=1e-4)(down_)
-    down_ = Dropout(drop_rate)(down_)
+    # down_ = Dropout(drop_rate)(down_)
     down_res = Activation('relu')(down_)
     down_pool = MaxPooling2D((2, 2), strides=(2, 2))(down_)
+    down_pool = Dropout(0.3)(down_pool)
     return down_pool, down_res
 
 def up(filters, input_, down_, drop_rate=0.0):
     up_ = UpSampling2D((2, 2))(input_)
     up_ = concatenate([down_, up_], axis=3)
+    up_ = Dropout(0.3)(up_)
     up_ = Conv2D(filters, (3, 3), padding='same')(up_)
     up_ = BatchNormalization(epsilon=1e-4)(up_)
     up_ = Dropout(drop_rate)(up_)
@@ -35,7 +37,7 @@ def up(filters, input_, down_, drop_rate=0.0):
     up_ = Activation('relu')(up_)
     up_ = Conv2D(filters, (3, 3), padding='same')(up_)
     up_ = BatchNormalization(epsilon=1e-4)(up_)
-    up_ = Dropout(drop_rate)(up_)
+    # up_ = Dropout(drop_rate)(up_)
     up_ = Activation('relu')(up_)
     return up_
 
@@ -105,9 +107,9 @@ def unet_256(input_shape=(128, 128, 1), num_classes=1, drop_rate=0.0):
 def unet_128(input_shape=(128, 128, 1), num_classes=1, drop_rate=0.0):
     inputs = Input(shape=input_shape)
 
-    down0a, down0a_res = down(16, inputs, drop_rate)
-    down0, down0_res = down(32, down0a, drop_rate)
-    down1, down1_res = down(64, down0, drop_rate)
+    down0a, down0a_res = down(24, inputs, drop_rate)
+    down0, down0_res = down(48, down0a, drop_rate)
+    down1, down1_res = down(90, down0, drop_rate)
     down2, down2_res = down(128, down1, drop_rate)
 
     center = Conv2D(128, (3, 3), padding='same')(down2)
@@ -120,9 +122,9 @@ def unet_128(input_shape=(128, 128, 1), num_classes=1, drop_rate=0.0):
     center = Activation('relu')(center)
 
     up2 = up(128, center, down2_res, drop_rate)
-    up1 = up(64, up2, down1_res, drop_rate)
-    up0 = up(32, up1, down0_res, drop_rate)
-    up0a = up(16, up0, down0a_res, drop_rate)
+    up1 = up(90, up2, down1_res, drop_rate)
+    up0 = up(48, up1, down0_res, drop_rate)
+    up0a = up(24, up0, down0a_res, drop_rate)
 
     classify = Conv2D(num_classes, (1, 1), activation='sigmoid', name='final_layer')(up0a)
 
